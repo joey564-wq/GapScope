@@ -1,0 +1,44 @@
+[project]
+name = "resume-tailor"
+version = "0.1.0"
+description = "Truthfully re-present a resume against a job description — no fabrication."
+requires-python = ">=3.11"
+dependencies = [
+    "pydantic>=2",
+    "numpy",
+    "scikit-learn",
+    "httpx",
+    "fastapi",
+    "uvicorn[standard]",
+    "python-dotenv",
+    "python-docx",
+]
+
+[project.optional-dependencies]
+# Real semantic embeddings (local). Optional so tests/CI run fully offline.
+semantic = ["sentence-transformers"]
+# Deployed LLM provider (paid tier — does not train on inputs).
+gemini = ["google-genai"]
+dev = ["pytest", "mypy", "ruff"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+addopts = "-q"
+
+[tool.mypy]
+python_version = "3.11"
+strict = true
+warn_unused_ignores = true
+ignore_missing_imports = true
+
+[tool.ruff]
+line-length = 88
+target-version = "py311"
+
+[tool.ruff.lint]
+select = ["E", "F", "I", "UP", "B", "SIM"]
+
+[tool.ruff.lint.flake8-bugbear]
+# FastAPI's dependency-injection pattern intentionally calls Depends() in
+# argument defaults; this is idiomatic, not a bug.
+extend-immutable-calls = ["fastapi.Depends"]
