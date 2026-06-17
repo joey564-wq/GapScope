@@ -1,0 +1,29 @@
+name: backend-ci
+
+# Runs the backend quality gate on every push and pull request. The pytest step
+# includes the PII-leak guard test, so a future change can't silently start
+# sending resume identity into an LLM prompt without the build going red.
+on: [push, pull_request]
+
+jobs:
+  quality:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: pip
+
+      - name: Install (dev extras)
+        run: pip install -e ".[dev]"
+
+      - name: Lint (ruff)
+        run: ruff check .
+
+      - name: Type-check (mypy)
+        run: mypy resume_tailor
+
+      - name: Tests (pytest)
+        run: pytest
