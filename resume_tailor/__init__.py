@@ -5,6 +5,7 @@ Public surface:
     - embeddings: swappable EmbeddingProvider backends
     - gap_analysis.analyze_gap: explainable coverage report
     - grounding.GroundingValidator: anti-fabrication checks on tailored output
+    - recommendations.recommend_for_gaps: LLM suggestions to close gaps
 """
 
 from __future__ import annotations
@@ -30,6 +31,10 @@ from .models import (
     TailoredBullet,
     TailoredResume,
 )
+
+# Imported after gap_analysis and models because recommendations.py imports
+# GapReport (from gap_analysis) and JobDescription (from models) at module load.
+from .recommendations import RecommendationReport, recommend_for_gaps
 from .tailoring import (
     GeminiClient,
     LLMClient,
@@ -54,6 +59,7 @@ __all__ = [
     "JobRequirement",
     "LLMClient",
     "OllamaClient",
+    "RecommendationReport",
     "Resume",
     "SentenceTransformerProvider",
     "SkillGroup",
@@ -63,6 +69,7 @@ __all__ = [
     "ViolationKind",
     "analyze_gap",
     "rebuild_resume",
+    "recommend_for_gaps",
     "resume_to_docx_bytes",
     "tailor_resume",
 ]

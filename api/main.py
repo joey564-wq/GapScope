@@ -1,10 +1,11 @@
 """FastAPI service for resume-tailor.
 
 Endpoints:
-    GET  /health   liveness check
-    POST /analyze  gap analysis of a resume against a job description
-    POST /tailor   privacy-safe, anti-fabrication tailoring + grounding report
-    POST /export   render an (edited) resume to a downloadable .docx
+    GET  /health     liveness check
+    POST /analyze    gap analysis of a resume against a job description
+    POST /tailor     privacy-safe, anti-fabrication tailoring + grounding report
+    POST /recommend  LLM suggestions for closing uncovered/partial gaps
+    POST /export     render an (edited) resume to a downloadable .docx
 
 Privacy posture enforced at this layer:
     - Resume content is processed in memory and never persisted.
@@ -29,8 +30,11 @@ from resume_tailor import (
     GapReport,
     GeminiClient,
     JobDescription,
+    OllamaClient,
+    RecommendationReport,
     Resume,
     analyze_gap,
+    recommend_for_gaps,
     tailor_resume,
 )
 from resume_tailor.embeddings import (
@@ -69,9 +73,16 @@ def get_provider() -> EmbeddingProvider:
 
 
 def get_llm() -> LLMClient:
-    """The deployed model. Constructed per request so tests can override it
-    before any real client (which needs GEMINI_API_KEY) is created."""
-    return GeminiClient("gemini-2.5-flash")
+    """Gemini in production; local Ollama for free offline dev.
+
+    Mirrors get_provider's degrade-gracefully pattern: if GEMINI_API_KEY is set
+    we use the hosted model, otherwise we fall back to a local Ollama model so
+    development needs no key and no network. Constructed per request so tests
+    can override it before any real client is created.
+    """
+    if os.environ.get("GEMINI_API_KEY"):
+        return GeminiClient("gemini-2.5-flash")
+    return OllamaClient(os.environ.get("OLLAMA_MODEL", "llama3.1"))
 
 
 # --------------------------------------------------------------------------- #
@@ -86,6 +97,11 @@ class AnalyzeRequest(BaseModel):
 
 class ExportRequest(BaseModel):
     resume: Resume
+
+
+class RecommendRequest(BaseModel):
+    gap: GapReport
+    job_description: JobDescription
 
 
 # --------------------------------------------------------------------------- #
@@ -128,6 +144,23 @@ def tailor(
         "grounding": grounding.model_dump(),
         "gap": report.model_dump(),
     }
+
+
+@app.post("/recommend", response_model=RecommendationReport)
+def recommend(
+    req: RecommendRequest,
+    llm: LLMClient = Depends(get_llm),
+) -> RecommendationReport:
+    """Suggest ways to close each uncovered/partial gap.
+
+    Sends only requirement text + job title to the LLM — no resume, no PII.
+    Suggestions are advice to acquire experience and are never merged into
+    tailored bullets.
+    """
+    try:
+        return recommend_for_gaps(req.gap, req.job_description, llm)
+    except Exception as exc:  # never leak internals to the client
+        raise HTTPException(status_code=502, detail="Recommendation failed") from exc
 
 
 @app.post("/export")
