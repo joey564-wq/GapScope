@@ -249,7 +249,6 @@ export default function App() {
       {step === "input" && (
         <section className="panel">
           <div className="panel-head">
-            <h2>Add your resume and the job</h2>
             <p className="hint">
               Paste your resume text and a job description below. Nothing is
               uploaded or stored. New here? Use “Load example” to see the format.
