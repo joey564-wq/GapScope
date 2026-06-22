@@ -1,5 +1,5 @@
 [project]
-name = "resume-tailor"
+name = "gapscope"
 version = "0.1.0"
 description = "Truthfully re-present a resume against a job description — no fabrication."
 requires-python = ">=3.11"

@@ -198,7 +198,7 @@ export default function App() {
           <div className="brand">
             <BrandSeal />
             <span className="brand-name">
-              resume<b>·</b>tailor
+              Gap<b>·</b>Scope
             </span>
           </div>
           <p className="eyebrow">Provenance-checked resume tailoring</p>
