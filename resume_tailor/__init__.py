@@ -1,11 +1,11 @@
-"""resume_tailor: truthfully re-present a resume against a job description.
+"""GapScope: analyze the gap between a resume and a job description.
 
 Public surface:
-    - models: structured Resume / JobDescription / TailoredResume
+    - models: structured Resume / JobDescription
     - embeddings: swappable EmbeddingProvider backends
     - gap_analysis.analyze_gap: explainable coverage report
-    - grounding.GroundingValidator: anti-fabrication checks on tailored output
     - recommendations.recommend_for_gaps: LLM suggestions to close gaps
+    - llm: LLM clients (Gemini / Ollama) behind a small protocol
 """
 
 from __future__ import annotations
@@ -16,9 +16,8 @@ from .embeddings import (
     SentenceTransformerProvider,
     TfidfEmbeddingProvider,
 )
-from .export import resume_to_docx_bytes
 from .gap_analysis import CoverageStatus, GapReport, analyze_gap
-from .grounding import GroundingReport, GroundingValidator, ViolationKind
+from .llm import GeminiClient, LLMClient, OllamaClient
 from .models import (
     Bullet,
     ContactInfo,
@@ -28,20 +27,11 @@ from .models import (
     JobRequirement,
     Resume,
     SkillGroup,
-    TailoredBullet,
-    TailoredResume,
 )
 
 # Imported after gap_analysis and models because recommendations.py imports
-# GapReport (from gap_analysis) and JobDescription (from models) at module load.
+# from both at module load.
 from .recommendations import RecommendationReport, recommend_for_gaps
-from .tailoring import (
-    GeminiClient,
-    LLMClient,
-    OllamaClient,
-    rebuild_resume,
-    tailor_resume,
-)
 
 __all__ = [
     "ApiEmbeddingProvider",
@@ -53,8 +43,6 @@ __all__ = [
     "EntryKind",
     "GapReport",
     "GeminiClient",
-    "GroundingReport",
-    "GroundingValidator",
     "JobDescription",
     "JobRequirement",
     "LLMClient",
@@ -63,13 +51,7 @@ __all__ = [
     "Resume",
     "SentenceTransformerProvider",
     "SkillGroup",
-    "TailoredBullet",
-    "TailoredResume",
     "TfidfEmbeddingProvider",
-    "ViolationKind",
     "analyze_gap",
-    "rebuild_resume",
     "recommend_for_gaps",
-    "resume_to_docx_bytes",
-    "tailor_resume",
 ]

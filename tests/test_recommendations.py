@@ -14,6 +14,7 @@ from fastapi.testclient import TestClient
 from api.main import app, get_llm, get_provider
 from resume_tailor import JobDescription, Resume, analyze_gap
 from resume_tailor.embeddings import TfidfEmbeddingProvider
+from resume_tailor.llm import LLMClient
 from resume_tailor.models import (
     Bullet,
     ContactInfo,
@@ -22,7 +23,6 @@ from resume_tailor.models import (
     JobRequirement,
 )
 from resume_tailor.recommendations import recommend_for_gaps
-from resume_tailor.tailoring import LLMClient
 
 
 class FakeLLM:

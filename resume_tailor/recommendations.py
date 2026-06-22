@@ -37,8 +37,8 @@ from enum import StrEnum
 from pydantic import BaseModel, Field
 
 from .gap_analysis import GapReport
+from .llm import LLMClient
 from .models import JobDescription
-from .tailoring import LLMClient
 
 
 class SuggestionKind(StrEnum):
